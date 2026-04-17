@@ -338,34 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Tu script original sigue igual (dark mode, filtros, modal, toast, etc.)
         // Solo cambiamos el placeholder del gráfico
 
-        const setupDarkMode = () => {
-            const htmlElement = document.documentElement;
-            const toggleButton = document.getElementById('dark-mode-toggle-sidebar');
-            const iconElement = document.getElementById('dark-mode-icon');
-            const textElement = document.getElementById('dark-mode-text');
-
-            const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const currentMode = localStorage.getItem('theme') || (userPrefersDark ? 'dark' : 'light');
-
-            const applyTheme = (theme) => {
-                if (theme === 'dark') {
-                    htmlElement.classList.add('dark');
-                    iconElement.textContent = 'light_mode';
-                    textElement.textContent = 'Modo Claro';
-                } else {
-                    htmlElement.classList.remove('dark');
-                    iconElement.textContent = 'dark_mode';
-                    textElement.textContent = 'Modo Oscuro';
-                }
-                localStorage.setItem('theme', theme);
-            };
-            applyTheme(currentMode);
-            toggleButton.addEventListener('click', () => {
-                const newMode = htmlElement.classList.contains('dark') ? 'light' : 'dark';
-                applyTheme(newMode);
-            });
-        };
-        setupDarkMode();
+        
 
         async function logAction(actionType, details = {}) {
             console.log(`[SIMULACIÓN] Acción registrada: ${actionType}`, details);
