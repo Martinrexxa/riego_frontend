@@ -474,6 +474,46 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 </script>
 
+<script>
+const API_URL = "https://riego-backend.onrender.com";
 
+// Encender riego
+document.getElementById("btn-riego-on").addEventListener("click", async () => {
+  try {
+    const res = await fetch(`${API_URL}/api/riego`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ estado: "ON" })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+  } catch (error) {
+    alert("No se pudo conectar al servidor");
+  }
+});
+
+// Apagar riego
+document.getElementById("btn-riego-off").addEventListener("click", async () => {
+  try {
+    const res = await fetch(`${API_URL}/api/riego`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ estado: "OFF" })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+  } catch (error) {
+    alert("No se pudo conectar al servidor");
+  }
+});
+</script>
 </body>
 </html>
