@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="light">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,9 +16,9 @@
                     colors: {
                         primary: "#1fdb6d",
                         danger: "#ef4444",
-                        background: { light: "#f6f8f7", dark: "#112118" },
-                        card: { light: "#ffffff", dark: "#18281f" },
-                        border: { light: "#e2e8f0", dark: "#2d3b33" }
+                        background: { light: "#f6f8f7" },
+                        card: { light: "#ffffff" },
+                        border: { light: "#e2e8f0" }
                     },
                     fontFamily: { sans: ["Manrope", "sans-serif"] }
                 }
@@ -33,12 +33,12 @@
     </style>
 </head>
 
-<body class="font-sans bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark hidden">
+<body class="font-sans bg-background-light text-text-light hidden">
 
 <div class="flex min-h-screen">
 
   <!-- Sidebar -->
-  <aside class="w-64 flex flex-col border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 shadow-lg">
+  <aside class="w-64 flex flex-col border-r border-border-light bg-card-light p-4 shadow-lg">
 
     <div class="flex items-center gap-3 mb-8">
       <div id="user-avatar"
@@ -48,7 +48,7 @@
 
       <div>
         <h1 id="user-name" class="text-base font-bold">Cargando...</h1>
-        <p id="user-role" class="text-sm text-gray-500 dark:text-gray-400">...</p>
+        <p id="user-role" class="text-sm text-gray-500">...</p>
       </div>
     </div>
 
@@ -103,7 +103,7 @@
   </a>
 </nav>
 
-    <div class="pt-4 border-t border-border-light dark:border-border-dark space-y-2">
+    <div class="pt-4 border-t border-border-light space-y-2">
       
 
       <button id="logout-btn"
@@ -120,11 +120,11 @@
     <main class="flex-1 p-8 overflow-y-auto">
         <div class="max-w-5xl mx-auto"> <!-- un poquito más ancho para que respire mejor -->
             <header class="mb-10">
-                <h2 class="text-4xl font-black text-[#111714] dark:text-white">Agregar Nuevo Sensor</h2>
+                <h2 class="text-4xl font-black text-[#111714]">Agregar Nuevo Sensor</h2>
             </header>
 
             <!-- CARD DEL FORMULARIO con más padding interno para "alargar" visualmente -->
-            <div class="bg-card-light dark:bg-card-dark p-10 rounded-2xl shadow-lg border border-border-light dark:border-border-dark">
+            <div class="bg-card-light p-10 rounded-2xl shadow-lg border border-border-light">
                 <form class="space-y-12"> <!-- más espacio entre secciones -->
 
                     <!-- Información Básica -->
@@ -132,11 +132,11 @@
                         <label class="flex flex-col">
                             <p class="font-semibold text-lg pb-3">ID del Sensor</p>
                             <input type="text" placeholder="Ingrese el identificador único"
-                                   class="h-14 px-5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-4 focus:ring-primary/30 focus:border-primary transition" />
+                                   class="h-14 px-5 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition" />
                         </label>
                         <label class="flex flex-col">
                             <p class="font-semibold text-lg pb-3">Tipo de Sensor</p>
-                            <select class="h-14 px-5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-4 focus:ring-primary/30 transition">
+                            <select class="h-14 px-5 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-primary/30 transition">
                                 <option>Seleccione un tipo</option>
                                 <option>Humedad</option>
                                 <option>Temperatura</option>
@@ -154,26 +154,26 @@
                             <!-- Izquierda -->
                             <div class="space-y-8">
                                 <input type="text" placeholder="Ej: Junto al rosal norte"
-                                       class="w-full h-14 px-5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900" />
+                                       class="w-full h-14 px-5 rounded-xl border border-gray-300 bg-white" />
                                 <div>
                                     <p class="font-semibold text-lg pb-3">Notas Adicionales</p>
                                     <textarea placeholder="Añada cualquier comentario relevante..."
-                                              class="w-full min-h-48 px-5 py-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 resize-y"></textarea>
+                                              class="w-full min-h-48 px-5 py-4 rounded-xl border border-gray-300 bg-white resize-y"></textarea>
                                 </div>
                             </div>
 
                             <!-- Derecha: Mapa más grande y centrado -->
                             <div class="flex flex-col justify-start">
-                                <p class="text-sm text-gray-500 dark:text-gray-400 pb-6">
+                                <p class="text-sm text-gray-500 pb-6">
                                     Haz clic en el mapa para ubicar el sensor
                                 </p>
-                                <div class="bg-gray-200 dark:bg-gray-800 rounded-2xl h-96 md:h-full min-h-96 flex flex-col items-center justify-center gap-6 px-8 shadow-inner">
+                                <div class="bg-gray-200 rounded-2xl h-96 md:h-full min-h-96 flex flex-col items-center justify-center gap-6 px-8 shadow-inner">
                                     <span class="material-symbols-outlined text-9xl text-gray-400">map</span>
                                     <div class="text-center">
-                                        <p class="text-xl font-semibold text-gray-600 dark:text-gray-300">
+                                        <p class="text-xl font-semibold text-gray-600">
                                             Mapa interactivo en desarrollo...
                                         </p>
-                                        <p class="text-base text-gray-500 dark:text-gray-400 mt-3">
+                                        <p class="text-base text-gray-500 mt-3">
                                             Selección de la zona del sensor
                                         </p>
                                     </div>
@@ -183,8 +183,8 @@
                     </section>
 
                     <!-- Botones finales -->
-                    <div class="flex justify-end gap-6 pt-10 border-t-2 border-gray-200 dark:border-gray-700">
-                        <button type="button" class="px-8 py-4 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition">
+                    <div class="flex justify-end gap-6 pt-10 border-t-2 border-gray-200">
+                        <button type="button" class="px-8 py-4 rounded-xl border-2 border-gray-300 hover:bg-gray-100 font-medium transition">
                             Cancelar
                         </button>
                         <button type="submit" class="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition shadow-md">
@@ -230,25 +230,6 @@
         link.classList.add("bg-primary/10", "text-primary", "font-semibold");
       }
     });
-
-    // Modo oscuro
-    const toggle = document.getElementById("dark-mode-toggle-sidebar");
-    const icon = document.getElementById("dark-mode-icon");
-    const text = document.getElementById("dark-mode-text");
-
-    if (toggle) {
-      toggle.addEventListener("click", () => {
-        document.documentElement.classList.toggle("dark");
-
-        if (document.documentElement.classList.contains("dark")) {
-          icon.textContent = "light_mode";
-          text.textContent = "Modo Claro";
-        } else {
-          icon.textContent = "dark_mode";
-          text.textContent = "Modo Oscuro";
-        }
-      });
-    }
 
     // Logout
     const logoutBtn = document.getElementById("logout-btn");
