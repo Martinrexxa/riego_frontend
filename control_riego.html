@@ -481,7 +481,32 @@ const API_URL =
     ? "http://localhost:3000"
     : "https://riego-backend.onrender.com";
 let valveTransitioning = false;
+let currentTransitionAction = null;
 const VALVE_MIN_TRANSITION_MS = 17000;
+
+function setNormalValveButtons() {
+  const openBtn = document.getElementById("valve-open-btn");
+  const closeBtn = document.getElementById("valve-close-btn");
+  openBtn.innerHTML = '<span class="material-symbols-outlined text-lg">water_drop</span> Abrir Valvula';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">block</span> Cerrar Valvula';
+}
+
+function setTransitionButtons(targetOpen) {
+  const openBtn = document.getElementById("valve-open-btn");
+  const closeBtn = document.getElementById("valve-close-btn");
+
+  if (targetOpen) {
+    openBtn.disabled = false;
+    openBtn.innerHTML = '<span class="material-symbols-outlined text-lg">cancel</span> Detener proceso';
+    closeBtn.disabled = true;
+    closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">block</span> Cerrar Valvula';
+  } else {
+    closeBtn.disabled = false;
+    closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">cancel</span> Detener proceso';
+    openBtn.disabled = true;
+    openBtn.innerHTML = '<span class="material-symbols-outlined text-lg">water_drop</span> Abrir Valvula';
+  }
+}
 
 function setValveUI(abierta) {
   const dot = document.getElementById("valve-dot");
@@ -492,6 +517,7 @@ function setValveUI(abierta) {
   const closeBtn = document.getElementById("valve-close-btn");
 
   if (abierta === null) {
+    setNormalValveButtons();
     dot.className = "w-3 h-3 rounded-full bg-yellow-400 transition-colors duration-500";
     label.textContent = "Estado desconocido";
     label.className = "text-sm font-semibold text-yellow-600";
@@ -503,6 +529,7 @@ function setValveUI(abierta) {
   }
 
   if (abierta) {
+    setNormalValveButtons();
     dot.className = "w-3 h-3 rounded-full bg-green-500 transition-colors duration-500";
     label.textContent = "ABIERTA";
     label.className = "text-sm font-semibold text-green-600";
@@ -511,6 +538,7 @@ function setValveUI(abierta) {
     openBtn.disabled = true;
     closeBtn.disabled = false;
   } else {
+    setNormalValveButtons();
     dot.className = "w-3 h-3 rounded-full bg-red-500 transition-colors duration-500";
     label.textContent = "CERRADA";
     label.className = "text-sm font-semibold text-red-600";
@@ -537,14 +565,17 @@ async function updateValveStatus() {
 
     if (status.transition?.inProgress) {
       const target = status.transition.targetOpen;
+      currentTransitionAction = target ? "opening" : "closing";
       document.getElementById("valve-label").textContent = target ? "Abriendo..." : "Cerrando...";
-      document.getElementById("valve-open-btn").disabled = true;
-      document.getElementById("valve-close-btn").disabled = true;
+      setTransitionButtons(target);
       return;
     }
 
+    currentTransitionAction = null;
     setValveUI(status.abierta);
   } catch {
+    currentTransitionAction = null;
+    setNormalValveButtons();
     document.getElementById("valve-label").textContent = "Sin conexion al servidor";
     document.getElementById("valve-open-btn").disabled = false;
     document.getElementById("valve-close-btn").disabled = false;
@@ -573,6 +604,7 @@ async function waitForValveState(targetOpen, minTransitionMs = VALVE_MIN_TRANSIT
 }
 
 async function controlValve(open) {
+  currentTransitionAction = open ? "opening" : "closing";
   valveTransitioning = true;
   document.getElementById("valve-open-btn").disabled = true;
   document.getElementById("valve-close-btn").disabled = true;
@@ -606,8 +638,40 @@ async function controlValve(open) {
   }
 }
 
-document.getElementById("valve-open-btn").addEventListener("click", () => controlValve(true));
-document.getElementById("valve-close-btn").addEventListener("click", () => controlValve(false));
+async function stopValveTransition() {
+  try {
+    const res = await fetch(`${API_URL}/api/riego/detener`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || "No se pudo detener el proceso", "error");
+    } else {
+      showToast("Proceso detenido y revertido", "success");
+    }
+  } catch {
+    showToast("No se pudo conectar al servidor", "error");
+  } finally {
+    await updateValveStatus();
+  }
+}
+
+document.getElementById("valve-open-btn").addEventListener("click", async () => {
+  if (currentTransitionAction === "opening") {
+    await stopValveTransition();
+    return;
+  }
+  await controlValve(true);
+});
+
+document.getElementById("valve-close-btn").addEventListener("click", async () => {
+  if (currentTransitionAction === "closing") {
+    await stopValveTransition();
+    return;
+  }
+  await controlValve(false);
+});
 
 updateValveStatus();
 setInterval(updateValveStatus, 1000);
