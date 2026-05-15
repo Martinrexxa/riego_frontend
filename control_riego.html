@@ -431,6 +431,7 @@ const VALVE_MIN_TRANSITION_MS = 17000;
 const DEFAULT_IRRIGATION_SECONDS = 30;
 let scheduledAutoCloseTimeout = null;
 let timedIrrigationActive = false;
+let timedIrrigationPending = false;
 let valveOpenSinceMs = null;
 let openElapsedInterval = null;
 
@@ -445,6 +446,11 @@ function setStartManualButton(active) {
     btn.classList.add("bg-secondary", "hover:bg-secondary/90");
     btn.innerHTML = '<span class="material-symbols-outlined text-lg">play_circle</span> Iniciar Riego';
   }
+}
+
+function setBottomButtonsDisabled(disabled) {
+  document.getElementById("valve-open-btn").disabled = disabled;
+  document.getElementById("valve-close-btn").disabled = disabled;
 }
 
 function formatSeconds(totalSeconds) {
@@ -628,6 +634,7 @@ function setValveUI(abierta) {
     valveOpenSinceMs = null;
     stopOpenElapsedTicker();
     timedIrrigationActive = false;
+    timedIrrigationPending = false;
     if (scheduledAutoCloseTimeout) {
       clearTimeout(scheduledAutoCloseTimeout);
       scheduledAutoCloseTimeout = null;
@@ -638,8 +645,7 @@ function setValveUI(abierta) {
     label.className = "text-sm font-semibold text-yellow-600";
     indicator.className = "w-16 h-16 rounded-full flex items-center justify-center bg-yellow-100 shadow-inner transition-colors duration-500";
     icon.className = "material-symbols-outlined text-3xl text-yellow-500";
-    openBtn.disabled = false;
-    closeBtn.disabled = false;
+    setBottomButtonsDisabled(false);
     return;
   }
 
@@ -648,23 +654,25 @@ function setValveUI(abierta) {
     if (!valveOpenSinceMs) valveOpenSinceMs = Date.now();
     startOpenElapsedTicker();
     updateOpenElapsedLabel();
-    if (timedIrrigationActive) {
+    if (timedIrrigationActive || timedIrrigationPending) {
       setStartManualButton(true);
+      setBottomButtonsDisabled(true);
     } else {
       setStartManualButton(false);
+      openBtn.disabled = true;
+      closeBtn.disabled = false;
     }
     dot.className = "w-3 h-3 rounded-full bg-green-500 transition-colors duration-500";
     label.textContent = "ABIERTA";
     label.className = "text-sm font-semibold text-green-600";
     indicator.className = "w-16 h-16 rounded-full flex items-center justify-center bg-green-100 shadow-inner transition-colors duration-500";
     icon.className = "material-symbols-outlined text-3xl text-green-600";
-    openBtn.disabled = true;
-    closeBtn.disabled = false;
   } else {
     setNormalValveButtons();
     valveOpenSinceMs = null;
     stopOpenElapsedTicker();
     timedIrrigationActive = false;
+    timedIrrigationPending = false;
     if (scheduledAutoCloseTimeout) {
       clearTimeout(scheduledAutoCloseTimeout);
       scheduledAutoCloseTimeout = null;
@@ -698,7 +706,12 @@ async function updateValveStatus() {
       const target = status.transition.targetOpen;
       currentTransitionAction = target ? "opening" : "closing";
       document.getElementById("valve-label").textContent = target ? "Abriendo..." : "Cerrando...";
-      setTransitionButtons(target);
+      if (timedIrrigationActive || timedIrrigationPending) {
+        setStartManualButton(true);
+        setBottomButtonsDisabled(true);
+      } else {
+        setTransitionButtons(target);
+      }
       return;
     }
 
@@ -708,8 +721,7 @@ async function updateValveStatus() {
     currentTransitionAction = null;
     setNormalValveButtons();
     document.getElementById("valve-label").textContent = "Sin conexion al servidor";
-    document.getElementById("valve-open-btn").disabled = false;
-    document.getElementById("valve-close-btn").disabled = false;
+    setBottomButtonsDisabled(false);
   }
 }
 
@@ -805,8 +817,10 @@ async function startTimedIrrigation() {
     return;
   }
 
-  timedIrrigationActive = true;
+  timedIrrigationPending = true;
+  timedIrrigationActive = false;
   setStartManualButton(true);
+  setBottomButtonsDisabled(true);
 
   const opened = await controlValve(true);
   if (!opened) {
@@ -814,10 +828,15 @@ async function startTimedIrrigation() {
       clearTimeout(scheduledAutoCloseTimeout);
       scheduledAutoCloseTimeout = null;
     }
+    timedIrrigationPending = false;
     timedIrrigationActive = false;
     setStartManualButton(false);
+    setBottomButtonsDisabled(false);
     return;
   }
+
+  timedIrrigationPending = false;
+  timedIrrigationActive = true;
 
   if (scheduledAutoCloseTimeout) clearTimeout(scheduledAutoCloseTimeout);
   scheduledAutoCloseTimeout = setTimeout(async () => {
@@ -827,8 +846,10 @@ async function startTimedIrrigation() {
       await controlValve(false);
     }
     scheduledAutoCloseTimeout = null;
+    timedIrrigationPending = false;
     timedIrrigationActive = false;
     setStartManualButton(false);
+    setBottomButtonsDisabled(false);
   }, parsedSeconds * 1000);
 }
 
@@ -844,11 +865,14 @@ async function stopTimedIrrigation() {
     await controlValve(false);
   }
 
+  timedIrrigationPending = false;
   timedIrrigationActive = false;
   setStartManualButton(false);
+  setBottomButtonsDisabled(false);
 }
 
 document.getElementById("valve-open-btn").addEventListener("click", async () => {
+  if (timedIrrigationActive || timedIrrigationPending) return;
   if (currentTransitionAction === "opening") {
     await stopValveTransition();
     return;
@@ -861,6 +885,7 @@ document.getElementById("valve-open-btn").addEventListener("click", async () => 
 });
 
 document.getElementById("valve-close-btn").addEventListener("click", async () => {
+  if (timedIrrigationActive || timedIrrigationPending) return;
   if (currentTransitionAction === "closing") {
     await stopValveTransition();
     return;
