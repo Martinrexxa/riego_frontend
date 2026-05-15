@@ -487,10 +487,9 @@ function parseDurationToSeconds(rawValue) {
 }
 
 function enforceDurationMask(input) {
-  const digits = (input.value.match(/\d/g) || []).slice(0, 4).join("");
-  const padded = digits.padEnd(4, "0");
-  const mm = padded.slice(0, 2);
-  const ss = padded.slice(2, 4);
+  const digits = (input.value.match(/\d/g) || []).slice(0, 4);
+  const mm = digits.slice(0, 2).join("");
+  const ss = digits.slice(2, 4).join("");
   input.value = `${mm}:${ss}`;
 }
 
@@ -771,11 +770,6 @@ if (!durationInput.value.trim()) {
 }
 enforceDurationMask(durationInput);
 durationInput.addEventListener("input", () => enforceDurationMask(durationInput));
-durationInput.addEventListener("focus", () => {
-  // coloca el cursor al final para editar rapido sin romper la mascara mm:ss
-  const len = durationInput.value.length;
-  durationInput.setSelectionRange(len, len);
-});
 setStartManualButton(false);
 
 updateValveStatus();
