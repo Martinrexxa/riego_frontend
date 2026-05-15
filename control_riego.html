@@ -528,6 +528,10 @@ function setupDurationInput(input) {
 
     if (/^\d$/.test(key)) {
       e.preventDefault();
+      // Si todas las posiciones estan completas, se sobreescribe la posicion actual.
+      // Si hay huecos, se llena de izquierda a derecha en el primer hueco disponible.
+      const firstEmpty = digits.findIndex((d) => d === "");
+      if (firstEmpty !== -1) slot = firstEmpty;
       digits[slot] = key;
       writeDigits(digits);
       const nextSlot = Math.min(3, slot + 1);
