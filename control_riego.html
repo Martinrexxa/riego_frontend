@@ -499,12 +499,24 @@ function setupDurationInput(input) {
 
   const slotFromCaret = (caret) => {
     if (caret <= 0) return 0;
-    if (caret === 1) return 1;
+    if (caret <= 1) return 1;
     if (caret <= 3) return 2;
     return 3;
   };
 
   const caretFromSlot = (slot) => slots[Math.max(0, Math.min(3, slot))];
+  const prevSlotFromCaret = (caret) => {
+    if (caret > 4) return 3;
+    if (caret > 3) return 2;
+    if (caret > 1) return 1;
+    return 0;
+  };
+  const nextSlotFromCaret = (caret) => {
+    if (caret <= 0) return 0;
+    if (caret <= 1) return 1;
+    if (caret <= 3) return 2;
+    return 3;
+  };
 
   const readDigits = () => {
     const v = input.value;
@@ -528,10 +540,7 @@ function setupDurationInput(input) {
 
     if (/^\d$/.test(key)) {
       e.preventDefault();
-      // Si todas las posiciones estan completas, se sobreescribe la posicion actual.
-      // Si hay huecos, se llena de izquierda a derecha en el primer hueco disponible.
-      const firstEmpty = digits.findIndex((d) => d === "");
-      if (firstEmpty !== -1) slot = firstEmpty;
+      // Escribe en la posicion actual sin mover ni borrar los otros digitos.
       digits[slot] = key;
       writeDigits(digits);
       const nextSlot = Math.min(3, slot + 1);
@@ -542,7 +551,7 @@ function setupDurationInput(input) {
 
     if (key === "Backspace") {
       e.preventDefault();
-      if (caret > slots[slot]) slot = Math.max(0, slot - 1);
+      slot = prevSlotFromCaret(caret);
       digits[slot] = "";
       writeDigits(digits);
       const newCaret = caretFromSlot(slot);
@@ -552,6 +561,7 @@ function setupDurationInput(input) {
 
     if (key === "Delete") {
       e.preventDefault();
+      slot = nextSlotFromCaret(caret);
       digits[slot] = "";
       writeDigits(digits);
       const newCaret = caretFromSlot(slot);
