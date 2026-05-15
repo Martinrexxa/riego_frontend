@@ -486,6 +486,14 @@ function parseDurationToSeconds(rawValue) {
   return min * 60 + sec;
 }
 
+function enforceDurationMask(input) {
+  const digits = (input.value.match(/\d/g) || []).slice(0, 4).join("");
+  const padded = digits.padEnd(4, "0");
+  const mm = padded.slice(0, 2);
+  const ss = padded.slice(2, 4);
+  input.value = `${mm}:${ss}`;
+}
+
 function setNormalValveButtons() {
   const openBtn = document.getElementById("valve-open-btn");
   const closeBtn = document.getElementById("valve-close-btn");
@@ -683,19 +691,30 @@ async function startTimedIrrigation() {
     return;
   }
 
-  const opened = await controlValve(true);
-  if (!opened) return;
-
   timedIrrigationActive = true;
   setStartManualButton(true);
 
   if (scheduledAutoCloseTimeout) clearTimeout(scheduledAutoCloseTimeout);
   scheduledAutoCloseTimeout = setTimeout(async () => {
-    await controlValve(false);
+    if (currentTransitionAction === "opening" || currentTransitionAction === "closing") {
+      await stopValveTransition();
+    } else {
+      await controlValve(false);
+    }
     scheduledAutoCloseTimeout = null;
     timedIrrigationActive = false;
     setStartManualButton(false);
   }, parsedSeconds * 1000);
+
+  const opened = await controlValve(true);
+  if (!opened) {
+    if (scheduledAutoCloseTimeout) {
+      clearTimeout(scheduledAutoCloseTimeout);
+      scheduledAutoCloseTimeout = null;
+    }
+    timedIrrigationActive = false;
+    setStartManualButton(false);
+  }
 }
 
 async function stopTimedIrrigation() {
@@ -750,6 +769,13 @@ const durationInput = document.getElementById("irrigation-duration");
 if (!durationInput.value.trim()) {
   durationInput.value = formatSeconds(DEFAULT_IRRIGATION_SECONDS);
 }
+enforceDurationMask(durationInput);
+durationInput.addEventListener("input", () => enforceDurationMask(durationInput));
+durationInput.addEventListener("focus", () => {
+  // coloca el cursor al final para editar rapido sin romper la mascara mm:ss
+  const len = durationInput.value.length;
+  durationInput.setSelectionRange(len, len);
+});
 setStartManualButton(false);
 
 updateValveStatus();
