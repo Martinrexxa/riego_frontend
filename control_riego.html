@@ -430,6 +430,7 @@ let currentTransitionAction = null;
 const VALVE_MIN_TRANSITION_MS = 17000;
 const DEFAULT_IRRIGATION_SECONDS = 30;
 let scheduledAutoCloseTimeout = null;
+let manualAutoCloseTimeout = null;
 let timedIrrigationActive = false;
 let timedIrrigationPending = false;
 let valveOpenSinceMs = null;
@@ -843,6 +844,21 @@ async function forceCloseFromTimed() {
   await updateValveStatus();
 }
 
+function clearManualAutoCloseTimer() {
+  if (manualAutoCloseTimeout) {
+    clearTimeout(manualAutoCloseTimeout);
+    manualAutoCloseTimeout = null;
+  }
+}
+
+function scheduleManualAutoClose() {
+  clearManualAutoCloseTimer();
+  manualAutoCloseTimeout = setTimeout(async () => {
+    await controlValve(false);
+    manualAutoCloseTimeout = null;
+  }, DEFAULT_IRRIGATION_SECONDS * 1000);
+}
+
 async function startTimedIrrigation() {
   const durationInput = document.getElementById("irrigation-duration");
   const parsedSeconds = parseDurationToSeconds(durationInput.value);
@@ -926,7 +942,8 @@ document.getElementById("valve-open-btn").addEventListener("click", async () => 
     clearTimeout(scheduledAutoCloseTimeout);
     scheduledAutoCloseTimeout = null;
   }
-  await controlValve(true);
+  const opened = await controlValve(true);
+  if (opened) scheduleManualAutoClose();
 });
 
 document.getElementById("valve-close-btn").addEventListener("click", async () => {
@@ -939,6 +956,7 @@ document.getElementById("valve-close-btn").addEventListener("click", async () =>
     clearTimeout(scheduledAutoCloseTimeout);
     scheduledAutoCloseTimeout = null;
   }
+  clearManualAutoCloseTimer();
   await controlValve(false);
 });
 
