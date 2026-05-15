@@ -476,7 +476,10 @@
 
 <script>
 // Control de Valvula Tuya PA-01K
-const API_URL = "http://localhost:3000";
+const API_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000"
+    : "https://riego-backend.onrender.com";
 let valveTransitioning = false;
 const VALVE_MIN_TRANSITION_MS = 17000;
 
@@ -521,14 +524,26 @@ function setValveUI(abierta) {
 async function fetchValveStatus() {
   const res = await fetch(`${API_URL}/api/valvula/estado`);
   const data = await res.json();
-  return data.success ? data.abierta : null;
+  return data.success ? data : null;
 }
 
 async function updateValveStatus() {
-  if (valveTransitioning) return;
   try {
-    const abierta = await fetchValveStatus();
-    setValveUI(abierta);
+    const status = await fetchValveStatus();
+    if (!status) {
+      setValveUI(null);
+      return;
+    }
+
+    if (status.transition?.inProgress) {
+      const target = status.transition.targetOpen;
+      document.getElementById("valve-label").textContent = target ? "Abriendo..." : "Cerrando...";
+      document.getElementById("valve-open-btn").disabled = true;
+      document.getElementById("valve-close-btn").disabled = true;
+      return;
+    }
+
+    setValveUI(status.abierta);
   } catch {
     document.getElementById("valve-label").textContent = "Sin conexion al servidor";
     document.getElementById("valve-open-btn").disabled = false;
@@ -540,10 +555,12 @@ async function waitForValveState(targetOpen, minTransitionMs = VALVE_MIN_TRANSIT
   const start = Date.now();
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const abierta = await fetchValveStatus();
+      const status = await fetchValveStatus();
+      const abierta = status?.abierta ?? null;
       const elapsed = Date.now() - start;
       const minTimeReached = elapsed >= minTransitionMs;
-      if (abierta === targetOpen && minTimeReached) {
+      const backendDone = status?.transition?.inProgress === false;
+      if (abierta === targetOpen && minTimeReached && backendDone) {
         setValveUI(abierta);
         return true;
       }
@@ -593,7 +610,7 @@ document.getElementById("valve-open-btn").addEventListener("click", () => contro
 document.getElementById("valve-close-btn").addEventListener("click", () => controlValve(false));
 
 updateValveStatus();
-setInterval(updateValveStatus, 15000);
+setInterval(updateValveStatus, 1000);
 </script>
 </body>
 </html>
