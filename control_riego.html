@@ -542,20 +542,15 @@ function setupDurationInput(input) {
 
     if (key === "Backspace") {
       e.preventDefault();
-      if (caret > slots[slot]) slot = Math.max(0, slot - 1);
-      digits[slot] = "";
-      writeDigits(digits);
-      const newCaret = caretFromSlot(slot);
-      input.setSelectionRange(newCaret, newCaret);
+      writeDigits(["", "", "", ""]);
+      input.setSelectionRange(0, 0);
       return;
     }
 
     if (key === "Delete") {
       e.preventDefault();
-      digits[slot] = "";
-      writeDigits(digits);
-      const newCaret = caretFromSlot(slot);
-      input.setSelectionRange(newCaret, newCaret);
+      writeDigits(["", "", "", ""]);
+      input.setSelectionRange(0, 0);
       return;
     }
 
