@@ -808,6 +808,41 @@ async function stopValveTransition() {
   }
 }
 
+async function sendValveCommand(open) {
+  try {
+    const res = await fetch(`${API_URL}/api/riego`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: open ? "ON" : "OFF" })
+    });
+    const data = await res.json();
+    return !!data.success;
+  } catch {
+    return false;
+  }
+}
+
+async function waitUntilPhysicallyOpen(maxAttempts = 40, delayMs = 1000) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const status = await fetchValveStatus();
+      if (status?.abierta === true) return true;
+    } catch {
+      // seguir intentando
+    }
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  return false;
+}
+
+async function forceCloseFromTimed() {
+  const ok = await sendValveCommand(false);
+  if (!ok) {
+    showToast("No se pudo cerrar la valvula", "error");
+  }
+  await updateValveStatus();
+}
+
 async function startTimedIrrigation() {
   const durationInput = document.getElementById("irrigation-duration");
   const parsedSeconds = parseDurationToSeconds(durationInput.value);
@@ -821,8 +856,23 @@ async function startTimedIrrigation() {
   timedIrrigationActive = false;
   setStartManualButton(true);
   setBottomButtonsDisabled(true);
+  document.getElementById("valve-label").textContent = "Abriendo...";
 
-  const opened = await controlValve(true);
+  const sent = await sendValveCommand(true);
+  if (!sent) {
+    if (scheduledAutoCloseTimeout) {
+      clearTimeout(scheduledAutoCloseTimeout);
+      scheduledAutoCloseTimeout = null;
+    }
+    timedIrrigationPending = false;
+    timedIrrigationActive = false;
+    setStartManualButton(false);
+    setBottomButtonsDisabled(false);
+    showToast("No se pudo iniciar el riego", "error");
+    return;
+  }
+
+  const opened = await waitUntilPhysicallyOpen();
   if (!opened) {
     if (scheduledAutoCloseTimeout) {
       clearTimeout(scheduledAutoCloseTimeout);
@@ -832,19 +882,18 @@ async function startTimedIrrigation() {
     timedIrrigationActive = false;
     setStartManualButton(false);
     setBottomButtonsDisabled(false);
+    showToast("La valvula no confirmo apertura a tiempo", "error");
+    await updateValveStatus();
     return;
   }
 
   timedIrrigationPending = false;
   timedIrrigationActive = true;
+  await updateValveStatus();
 
   if (scheduledAutoCloseTimeout) clearTimeout(scheduledAutoCloseTimeout);
   scheduledAutoCloseTimeout = setTimeout(async () => {
-    if (currentTransitionAction === "opening" || currentTransitionAction === "closing") {
-      await stopValveTransition();
-    } else {
-      await controlValve(false);
-    }
+    await forceCloseFromTimed();
     scheduledAutoCloseTimeout = null;
     timedIrrigationPending = false;
     timedIrrigationActive = false;
@@ -859,11 +908,7 @@ async function stopTimedIrrigation() {
     scheduledAutoCloseTimeout = null;
   }
 
-  if (currentTransitionAction === "opening" || currentTransitionAction === "closing") {
-    await stopValveTransition();
-  } else {
-    await controlValve(false);
-  }
+  await forceCloseFromTimed();
 
   timedIrrigationPending = false;
   timedIrrigationActive = false;
@@ -898,7 +943,7 @@ document.getElementById("valve-close-btn").addEventListener("click", async () =>
 });
 
 document.getElementById("start-manual-btn").addEventListener("click", async () => {
-  if (timedIrrigationActive) {
+  if (timedIrrigationActive || timedIrrigationPending) {
     await stopTimedIrrigation();
     return;
   }
