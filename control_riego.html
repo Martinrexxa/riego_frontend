@@ -627,6 +627,12 @@ function setValveUI(abierta) {
     setNormalValveButtons();
     valveOpenSinceMs = null;
     stopOpenElapsedTicker();
+    timedIrrigationActive = false;
+    if (scheduledAutoCloseTimeout) {
+      clearTimeout(scheduledAutoCloseTimeout);
+      scheduledAutoCloseTimeout = null;
+    }
+    setStartManualButton(false);
     dot.className = "w-3 h-3 rounded-full bg-yellow-400 transition-colors duration-500";
     label.textContent = "Estado desconocido";
     label.className = "text-sm font-semibold text-yellow-600";
@@ -642,6 +648,11 @@ function setValveUI(abierta) {
     if (!valveOpenSinceMs) valveOpenSinceMs = Date.now();
     startOpenElapsedTicker();
     updateOpenElapsedLabel();
+    if (timedIrrigationActive) {
+      setStartManualButton(true);
+    } else {
+      setStartManualButton(false);
+    }
     dot.className = "w-3 h-3 rounded-full bg-green-500 transition-colors duration-500";
     label.textContent = "ABIERTA";
     label.className = "text-sm font-semibold text-green-600";
@@ -653,6 +664,12 @@ function setValveUI(abierta) {
     setNormalValveButtons();
     valveOpenSinceMs = null;
     stopOpenElapsedTicker();
+    timedIrrigationActive = false;
+    if (scheduledAutoCloseTimeout) {
+      clearTimeout(scheduledAutoCloseTimeout);
+      scheduledAutoCloseTimeout = null;
+    }
+    setStartManualButton(false);
     dot.className = "w-3 h-3 rounded-full bg-red-500 transition-colors duration-500";
     label.textContent = "CERRADA";
     label.className = "text-sm font-semibold text-red-600";
@@ -791,6 +808,17 @@ async function startTimedIrrigation() {
   timedIrrigationActive = true;
   setStartManualButton(true);
 
+  const opened = await controlValve(true);
+  if (!opened) {
+    if (scheduledAutoCloseTimeout) {
+      clearTimeout(scheduledAutoCloseTimeout);
+      scheduledAutoCloseTimeout = null;
+    }
+    timedIrrigationActive = false;
+    setStartManualButton(false);
+    return;
+  }
+
   if (scheduledAutoCloseTimeout) clearTimeout(scheduledAutoCloseTimeout);
   scheduledAutoCloseTimeout = setTimeout(async () => {
     if (currentTransitionAction === "opening" || currentTransitionAction === "closing") {
@@ -802,16 +830,6 @@ async function startTimedIrrigation() {
     timedIrrigationActive = false;
     setStartManualButton(false);
   }, parsedSeconds * 1000);
-
-  const opened = await controlValve(true);
-  if (!opened) {
-    if (scheduledAutoCloseTimeout) {
-      clearTimeout(scheduledAutoCloseTimeout);
-      scheduledAutoCloseTimeout = null;
-    }
-    timedIrrigationActive = false;
-    setStartManualButton(false);
-  }
 }
 
 async function stopTimedIrrigation() {
