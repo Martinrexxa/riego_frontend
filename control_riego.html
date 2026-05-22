@@ -274,8 +274,8 @@
                 </div>
 
                 <div>
-                  <label class="text-sm font-medium text-gray-700" for="schedule-duration-seconds">Duración (segundos)</label>
-                  <input id="schedule-duration-seconds" type="number" value="30" min="1" class="mt-2 w-full px-4 py-4 text-center text-lg font-medium bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                  <label class="text-sm font-medium text-gray-700" for="schedule-duration">Duración (min:seg)</label>
+                  <input id="schedule-duration" type="text" value="00:30" placeholder="00:30" class="mt-2 w-full px-4 py-4 text-center text-lg font-medium bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary tracking-wide" />
                 </div>
               </div>
 
@@ -1033,7 +1033,7 @@ function getScheduleSummary(config) {
   const durationSeconds = Number.isFinite(Number(config.durationSeconds))
     ? Math.floor(Number(config.durationSeconds))
     : Math.floor(Number(config.durationMinutes || 0) * 60);
-  summary.textContent = `Activo: ${config.time} · ${durationSeconds} s · Días: ${daysText}`;
+  summary.textContent = `Activo: ${config.time} · ${formatSeconds(durationSeconds)} · Días: ${daysText}`;
 }
 
 async function fetchScheduleConfigFromApi() {
@@ -1062,16 +1062,16 @@ function paintSelectedDays(days) {
 async function loadScheduleIntoForm() {
   const config = await fetchScheduleConfigFromApi();
   const timeInput = document.getElementById("schedule-start-time");
-  const durationInputSeconds = document.getElementById("schedule-duration-seconds");
+  const durationInput = document.getElementById("schedule-duration");
   if (config?.enabled) {
     timeInput.value = config.time || "06:00";
     const savedSeconds = Number.isFinite(Number(config.durationSeconds))
       ? Math.floor(Number(config.durationSeconds))
       : Math.floor(Number(config.durationMinutes || 20) * 60);
-    durationInputSeconds.value = String(savedSeconds > 0 ? savedSeconds : 30);
+    durationInput.value = formatSeconds(savedSeconds > 0 ? savedSeconds : 30);
     paintSelectedDays(config.days || []);
   } else {
-    durationInputSeconds.value = "30";
+    durationInput.value = "00:30";
     paintSelectedDays([0, 2, 4]);
   }
   getScheduleSummary(config);
@@ -1123,13 +1123,13 @@ function initScheduleActions() {
   const saveBtn = document.getElementById("save-schedule-btn");
   const cancelBtn = document.getElementById("cancel-schedule-btn");
   const timeInput = document.getElementById("schedule-start-time");
-  const durationInputSeconds = document.getElementById("schedule-duration-seconds");
+  const durationInput = document.getElementById("schedule-duration");
 
   saveBtn.onclick = async () => {
     const selectedDays = Array.from(document.querySelectorAll(".day-btn"))
       .filter((btn) => btn.classList.contains("bg-primary"))
       .map((btn) => Number(btn.dataset.day));
-    const durationSeconds = Number(durationInputSeconds.value);
+    const durationSeconds = parseDurationToSeconds(durationInput.value);
     const time = (timeInput.value || "").trim();
 
     if (!/^\d{2}:\d{2}$/.test(time)) {
@@ -1137,7 +1137,7 @@ function initScheduleActions() {
       return;
     }
     if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
-      showToast("La duración debe ser mayor que 0", "error");
+      showToast("Duración inválida. Usa formato min:seg, por ejemplo 01:30", "error");
       return;
     }
     if (selectedDays.length === 0) {
@@ -1186,6 +1186,14 @@ if (!durationInput.value.trim()) {
 }
 enforceDurationMask(durationInput);
 setupDurationInput(durationInput);
+const scheduleDurationInput = document.getElementById("schedule-duration");
+if (scheduleDurationInput) {
+  if (!scheduleDurationInput.value.trim()) {
+    scheduleDurationInput.value = "00:30";
+  }
+  enforceDurationMask(scheduleDurationInput);
+  setupDurationInput(scheduleDurationInput);
+}
 setStartManualButton(false);
 loadScheduleIntoForm();
 initScheduleActions();
