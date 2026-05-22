@@ -264,42 +264,18 @@
             <div class="bg-card-light border border-border-light rounded-xl p-6 shadow-sm">
               <h2 class="text-xl font-bold mb-6">Programar Riego Automático</h2>
 
-              <!-- Tabs -->
-              <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
-                <button id="tab-tiempo-btn" class="flex-1 py-3 px-6 rounded-lg font-bold text-white bg-primary shadow-sm">
-                  Por Tiempo
-                </button>
-                <button id="tab-condicion-btn" class="flex-1 py-3 px-6 rounded-lg font-medium text-gray-600">
-                  Por Condición
-                </button>
-              </div>
-
-              <!-- Por Tiempo -->
-              <div id="content-tiempo">
-                <div class="space-y-6">
-                  <div>
-                    <label class="text-sm font-medium text-gray-700">Hora de inicio</label>
-                    <div class="mt-2 relative">
-                      <input type="text" readonly value="06:00 AM" class="w-full px-4 py-4 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-medium text-lg" />
-                      <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">schedule</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="text-sm font-medium text-gray-700">Duración (minutos)</label>
-                    <input type="number" value="20" min="1" class="mt-2 w-full px-4 py-4 text-center text-lg font-medium bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+              <div class="space-y-6">
+                <div>
+                  <label class="text-sm font-medium text-gray-700" for="schedule-start-time">Hora de inicio</label>
+                  <div class="mt-2 relative">
+                    <input id="schedule-start-time" type="time" value="06:00" class="w-full px-4 py-4 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-medium text-lg" />
+                    <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">schedule</span>
                   </div>
                 </div>
-              </div>
 
-              <!-- Por Condición -->
-              <div id="content-condicion" class="hidden">
-                <div class="space-y-4">
-                  <label class="text-sm font-medium text-gray-700">Humedad mínima para activar (%)</label>
-                  <input type="number" value="40" min="1" max="100" class="w-full px-4 py-4 text-center text-lg font-medium bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary" />
-                  <p class="text-xs text-gray-500 text-center mt-2">
-                    Se activará automáticamente si la humedad baja de este valor
-                  </p>
+                <div>
+                  <label class="text-sm font-medium text-gray-700" for="schedule-duration-minutes">Duración (minutos)</label>
+                  <input id="schedule-duration-minutes" type="number" value="20" min="1" class="mt-2 w-full px-4 py-4 text-center text-lg font-medium bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
                 </div>
               </div>
 
@@ -307,19 +283,19 @@
               <div class="mt-8">
                 <p class="text-sm font-medium text-gray-700 mb-4">Seleccionar días</p>
                 <div class="grid grid-cols-7 gap-3">
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">D</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">L</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">M</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">M</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">J</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">V</button>
-                  <button class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">S</button>
+                  <button data-day="0" class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">D</button>
+                  <button data-day="1" class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">L</button>
+                  <button data-day="2" class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">M</button>
+                  <button data-day="3" class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">M</button>
+                  <button data-day="4" class="day-btn h-12 w-12 rounded-full font-bold text-white bg-primary">J</button>
+                  <button data-day="5" class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">V</button>
+                  <button data-day="6" class="day-btn h-12 w-12 rounded-full font-bold text-gray-600 bg-gray-100">S</button>
                 </div>
               </div>
 
               <!-- Botones finales -->
               <div class="flex gap-3 mt-8">
-                <button class="flex-1 h-12 rounded-xl border border-gray-300 font-medium hover:bg-gray-100 transition">
+                <button id="cancel-schedule-btn" class="flex-1 h-12 rounded-xl border border-gray-300 font-medium hover:bg-gray-100 transition">
                   Cancelar
                 </button>
                 <button id="save-schedule-btn" class="flex-1 h-12 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 flex items-center justify-center gap-2 transition">
@@ -327,6 +303,7 @@
                   Guardar
                 </button>
               </div>
+              <p id="schedule-summary" class="text-xs text-gray-500 mt-4 text-center">Sin programación activa</p>
             </div>
           </div>
         </div>
@@ -334,38 +311,24 @@
     </main>
   </div>
 
-  <script>`r`n    function showToast(msg, type = 'info') {
-      const toast = document.getElementById('toast');
+  <script>
+    function showToast(msg, type = "info") {
+      const toast = document.getElementById("toast");
       toast.textContent = msg;
       toast.className = type;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 4000);
-    }`r`n    // Tabs
-    document.getElementById('tab-tiempo-btn').onclick = () => {
-      document.getElementById('tab-tiempo-btn').classList.add('bg-primary', 'text-white', 'shadow-sm');
-      document.getElementById('tab-condicion-btn').classList.remove('bg-primary', 'text-white', 'shadow-sm');
-      document.getElementById('content-tiempo').classList.remove('hidden');
-      document.getElementById('content-condicion').classList.add('hidden');
-    };
-    document.getElementById('tab-condicion-btn').onclick = () => {
-      document.getElementById('tab-condicion-btn').classList.add('bg-primary', 'text-white', 'shadow-sm');
-      document.getElementById('tab-tiempo-btn').classList.remove('bg-primary', 'text-white', 'shadow-sm');
-      document.getElementById('content-condicion').classList.remove('hidden');
-      document.getElementById('content-tiempo').classList.add('hidden');
-    };
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 4000);
+    }
 
-    // Días (toggle)
-    document.querySelectorAll('.day-btn').forEach(btn => {
+    // D�as (toggle)
+    document.querySelectorAll(".day-btn").forEach((btn) => {
       btn.onclick = () => {
-        btn.classList.toggle('bg-primary');
-        btn.classList.toggle('text-white');
-        btn.classList.toggle('bg-gray-100');
-        btn.classList.toggle('text-gray-600');
+        btn.classList.toggle("bg-primary");
+        btn.classList.toggle("text-white");
+        btn.classList.toggle("bg-gray-100");
+        btn.classList.toggle("text-gray-600");
       };
     });
-
-    // Guardar programación
-    document.getElementById('save-schedule-btn').onclick = () => showToast('Programación guardada correctamente', 'success');
   </script>
 
 
@@ -433,8 +396,13 @@ let scheduledAutoCloseTimeout = null;
 let manualAutoCloseTimeout = null;
 let timedIrrigationActive = false;
 let timedIrrigationPending = false;
+let manualIrrigationActive = false;
+let manualAutoCloseDeadlineMs = null;
+let manualAutoCloseInFlight = false;
 let valveOpenSinceMs = null;
 let openElapsedInterval = null;
+const SCHEDULE_STORAGE_KEY = "riegoProgramadoConfigV1";
+let scheduleCheckInterval = null;
 
 function setStartManualButton(active) {
   const btn = document.getElementById("start-manual-btn");
@@ -446,6 +414,16 @@ function setStartManualButton(active) {
     btn.classList.remove("bg-danger", "hover:bg-danger/90");
     btn.classList.add("bg-secondary", "hover:bg-secondary/90");
     btn.innerHTML = '<span class="material-symbols-outlined text-lg">play_circle</span> Iniciar Riego';
+  }
+}
+
+function setStartManualEnabled(enabled) {
+  const btn = document.getElementById("start-manual-btn");
+  btn.disabled = !enabled;
+  if (enabled) {
+    btn.classList.remove("opacity-50", "cursor-not-allowed");
+  } else {
+    btn.classList.add("opacity-50", "cursor-not-allowed");
   }
 }
 
@@ -636,11 +614,14 @@ function setValveUI(abierta) {
     stopOpenElapsedTicker();
     timedIrrigationActive = false;
     timedIrrigationPending = false;
+    manualIrrigationActive = false;
+    clearManualAutoCloseTimer();
     if (scheduledAutoCloseTimeout) {
       clearTimeout(scheduledAutoCloseTimeout);
       scheduledAutoCloseTimeout = null;
     }
     setStartManualButton(false);
+    setStartManualEnabled(true);
     dot.className = "w-3 h-3 rounded-full bg-yellow-400 transition-colors duration-500";
     label.textContent = "Estado desconocido";
     label.className = "text-sm font-semibold text-yellow-600";
@@ -657,9 +638,11 @@ function setValveUI(abierta) {
     updateOpenElapsedLabel();
     if (timedIrrigationActive || timedIrrigationPending) {
       setStartManualButton(true);
+      setStartManualEnabled(true);
       setBottomButtonsDisabled(true);
     } else {
       setStartManualButton(false);
+      setStartManualEnabled(!manualIrrigationActive);
       openBtn.disabled = true;
       closeBtn.disabled = false;
     }
@@ -674,11 +657,14 @@ function setValveUI(abierta) {
     stopOpenElapsedTicker();
     timedIrrigationActive = false;
     timedIrrigationPending = false;
+    manualIrrigationActive = false;
+    clearManualAutoCloseTimer();
     if (scheduledAutoCloseTimeout) {
       clearTimeout(scheduledAutoCloseTimeout);
       scheduledAutoCloseTimeout = null;
     }
     setStartManualButton(false);
+    setStartManualEnabled(true);
     dot.className = "w-3 h-3 rounded-full bg-red-500 transition-colors duration-500";
     label.textContent = "CERRADA";
     label.className = "text-sm font-semibold text-red-600";
@@ -703,14 +689,31 @@ async function updateValveStatus() {
       return;
     }
 
+    if (
+      manualIrrigationActive &&
+      manualAutoCloseDeadlineMs &&
+      Date.now() >= manualAutoCloseDeadlineMs &&
+      !manualAutoCloseInFlight
+    ) {
+      manualAutoCloseInFlight = true;
+      await forceCloseFromTimed();
+      manualIrrigationActive = false;
+      clearManualAutoCloseTimer();
+      setStartManualEnabled(true);
+      manualAutoCloseInFlight = false;
+    }
+
     if (status.transition?.inProgress) {
       const target = status.transition.targetOpen;
       currentTransitionAction = target ? "opening" : "closing";
       document.getElementById("valve-label").textContent = target ? "Abriendo..." : "Cerrando...";
       if (timedIrrigationActive || timedIrrigationPending) {
         setStartManualButton(true);
+        setStartManualEnabled(true);
         setBottomButtonsDisabled(true);
       } else {
+        setStartManualButton(false);
+        setStartManualEnabled(false);
         setTransitionButtons(target);
       }
       return;
@@ -750,6 +753,9 @@ async function waitForValveState(targetOpen, minTransitionMs = VALVE_MIN_TRANSIT
 async function controlValve(open) {
   currentTransitionAction = open ? "opening" : "closing";
   valveTransitioning = true;
+  if (!timedIrrigationActive && !timedIrrigationPending) {
+    setStartManualEnabled(false);
+  }
   document.getElementById("valve-open-btn").disabled = true;
   document.getElementById("valve-close-btn").disabled = true;
   document.getElementById("valve-label").textContent = open ? "Abriendo..." : "Cerrando...";
@@ -783,6 +789,9 @@ async function controlValve(open) {
     return false;
   } finally {
     valveTransitioning = false;
+    if (!timedIrrigationActive && !timedIrrigationPending) {
+      setStartManualEnabled(true);
+    }
   }
 }
 
@@ -849,25 +858,56 @@ function clearManualAutoCloseTimer() {
     clearTimeout(manualAutoCloseTimeout);
     manualAutoCloseTimeout = null;
   }
+  manualAutoCloseDeadlineMs = null;
+  manualAutoCloseInFlight = false;
 }
 
 function scheduleManualAutoClose() {
   clearManualAutoCloseTimer();
+  manualAutoCloseDeadlineMs = Date.now() + DEFAULT_IRRIGATION_SECONDS * 1000;
   manualAutoCloseTimeout = setTimeout(async () => {
-    await controlValve(false);
+    manualAutoCloseInFlight = true;
+    await forceCloseFromTimed();
+    manualIrrigationActive = false;
     manualAutoCloseTimeout = null;
+    manualAutoCloseDeadlineMs = null;
+    manualAutoCloseInFlight = false;
+    setStartManualEnabled(true);
   }, DEFAULT_IRRIGATION_SECONDS * 1000);
 }
 
-async function startTimedIrrigation() {
-  const durationInput = document.getElementById("irrigation-duration");
-  const parsedSeconds = parseDurationToSeconds(durationInput.value);
+async function openManualWithAutoClose() {
+  setStartManualEnabled(false);
+  const sent = await sendValveCommand(true);
+  if (!sent) {
+    showToast("No se pudo abrir la valvula", "error");
+    setStartManualEnabled(true);
+    return;
+  }
+  const opened = await waitUntilPhysicallyOpen();
+  if (!opened) {
+    showToast("La valvula no confirmo apertura", "error");
+    setStartManualEnabled(true);
+    await updateValveStatus();
+    return;
+  }
+  manualIrrigationActive = true;
+  await updateValveStatus();
+  scheduleManualAutoClose();
+  setStartManualEnabled(false);
+}
 
-  if (parsedSeconds === null || parsedSeconds <= 0) {
+async function startTimedIrrigation(overrideSeconds = null) {
+  const durationInput = document.getElementById("irrigation-duration");
+  const parsedSeconds = overrideSeconds ?? parseDurationToSeconds(durationInput.value);
+
+  if (!Number.isFinite(parsedSeconds) || parsedSeconds <= 0) {
     showToast("Duracion invalida. Usa formato min:seg, por ejemplo 00:30", "error");
     return;
   }
 
+  manualIrrigationActive = false;
+  clearManualAutoCloseTimer();
   timedIrrigationPending = true;
   timedIrrigationActive = false;
   setStartManualButton(true);
@@ -942,8 +982,7 @@ document.getElementById("valve-open-btn").addEventListener("click", async () => 
     clearTimeout(scheduledAutoCloseTimeout);
     scheduledAutoCloseTimeout = null;
   }
-  const opened = await controlValve(true);
-  if (opened) scheduleManualAutoClose();
+  await openManualWithAutoClose();
 });
 
 document.getElementById("valve-close-btn").addEventListener("click", async () => {
@@ -956,17 +995,148 @@ document.getElementById("valve-close-btn").addEventListener("click", async () =>
     clearTimeout(scheduledAutoCloseTimeout);
     scheduledAutoCloseTimeout = null;
   }
+  manualIrrigationActive = false;
   clearManualAutoCloseTimer();
   await controlValve(false);
+  setStartManualEnabled(true);
 });
 
 document.getElementById("start-manual-btn").addEventListener("click", async () => {
+  if (manualIrrigationActive) return;
+  if (!timedIrrigationActive && !timedIrrigationPending && (currentTransitionAction === "opening" || currentTransitionAction === "closing" || valveTransitioning)) {
+    return;
+  }
   if (timedIrrigationActive || timedIrrigationPending) {
     await stopTimedIrrigation();
     return;
   }
   await startTimedIrrigation();
 });
+
+function getScheduleSummary(config) {
+  const summary = document.getElementById("schedule-summary");
+  if (!config || !config.enabled) {
+    summary.textContent = "Sin programación activa";
+    return;
+  }
+  const dayLabels = ["D", "L", "M", "X", "J", "V", "S"];
+  const daysText = (config.days || [])
+    .slice()
+    .sort((a, b) => a - b)
+    .map((d) => dayLabels[d])
+    .join(", ");
+  summary.textContent = `Activo: ${config.time} · ${config.durationMinutes} min · Días: ${daysText}`;
+}
+
+function getCurrentScheduleConfig() {
+  try {
+    const raw = localStorage.getItem(SCHEDULE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function paintSelectedDays(days) {
+  const selected = new Set(days || []);
+  document.querySelectorAll(".day-btn").forEach((btn) => {
+    const day = Number(btn.dataset.day);
+    const isOn = selected.has(day);
+    btn.classList.toggle("bg-primary", isOn);
+    btn.classList.toggle("text-white", isOn);
+    btn.classList.toggle("bg-gray-100", !isOn);
+    btn.classList.toggle("text-gray-600", !isOn);
+  });
+}
+
+function loadScheduleIntoForm() {
+  const config = getCurrentScheduleConfig();
+  const timeInput = document.getElementById("schedule-start-time");
+  const durationInputMinutes = document.getElementById("schedule-duration-minutes");
+  if (config?.enabled) {
+    timeInput.value = config.time || "06:00";
+    durationInputMinutes.value = String(config.durationMinutes || 20);
+    paintSelectedDays(config.days || []);
+  } else {
+    paintSelectedDays([0, 2, 4]);
+  }
+  getScheduleSummary(config);
+}
+
+async function maybeRunScheduledIrrigation() {
+  const config = getCurrentScheduleConfig();
+  if (!config?.enabled) return;
+  if (timedIrrigationActive || timedIrrigationPending || manualIrrigationActive) return;
+  if (currentTransitionAction === "opening" || currentTransitionAction === "closing" || valveTransitioning) return;
+
+  const now = new Date();
+  const nowHHMM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const today = now.getDay();
+  const todayKey = now.toISOString().slice(0, 10);
+  const selectedDays = Array.isArray(config.days) ? config.days : [];
+
+  if (!selectedDays.includes(today)) return;
+  if (config.time !== nowHHMM) return;
+  if (config.lastRunDate === todayKey) return;
+
+  const durationMinutes = Number(config.durationMinutes);
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) return;
+
+  const durationSeconds = Math.floor(durationMinutes * 60);
+  await startTimedIrrigation(durationSeconds);
+
+  const updated = { ...config, lastRunDate: todayKey };
+  localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(updated));
+  getScheduleSummary(updated);
+}
+
+function initScheduleActions() {
+  const saveBtn = document.getElementById("save-schedule-btn");
+  const cancelBtn = document.getElementById("cancel-schedule-btn");
+  const timeInput = document.getElementById("schedule-start-time");
+  const durationInputMinutes = document.getElementById("schedule-duration-minutes");
+
+  saveBtn.onclick = () => {
+    const selectedDays = Array.from(document.querySelectorAll(".day-btn"))
+      .filter((btn) => btn.classList.contains("bg-primary"))
+      .map((btn) => Number(btn.dataset.day));
+    const durationMinutes = Number(durationInputMinutes.value);
+    const time = (timeInput.value || "").trim();
+
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      showToast("Selecciona una hora válida", "error");
+      return;
+    }
+    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+      showToast("La duración debe ser mayor que 0", "error");
+      return;
+    }
+    if (selectedDays.length === 0) {
+      showToast("Selecciona al menos un día", "error");
+      return;
+    }
+
+    const config = {
+      enabled: true,
+      time,
+      durationMinutes: Math.floor(durationMinutes),
+      days: selectedDays,
+      lastRunDate: null
+    };
+    localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(config));
+    getScheduleSummary(config);
+    showToast("Programación guardada correctamente", "success");
+  };
+
+  cancelBtn.onclick = () => {
+    localStorage.removeItem(SCHEDULE_STORAGE_KEY);
+    getScheduleSummary(null);
+    showToast("Programación cancelada", "info");
+  };
+}
 
 const durationInput = document.getElementById("irrigation-duration");
 if (!durationInput.value.trim()) {
@@ -975,12 +1145,17 @@ if (!durationInput.value.trim()) {
 enforceDurationMask(durationInput);
 setupDurationInput(durationInput);
 setStartManualButton(false);
+loadScheduleIntoForm();
+initScheduleActions();
+if (scheduleCheckInterval) clearInterval(scheduleCheckInterval);
+scheduleCheckInterval = setInterval(maybeRunScheduledIrrigation, 10000);
 
 updateValveStatus();
 setInterval(updateValveStatus, 1000);
 </script>
 </body>
 </html>
+
 
 
 
