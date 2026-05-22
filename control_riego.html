@@ -403,6 +403,7 @@ let valveOpenSinceMs = null;
 let openElapsedInterval = null;
 const SCHEDULE_STORAGE_KEY = "riegoProgramadoConfigV1";
 let scheduleCheckInterval = null;
+let stopTransitionPending = false;
 
 function setStartManualButton(active) {
   const btn = document.getElementById("start-manual-btn");
@@ -593,8 +594,8 @@ function setTransitionButtons(targetOpen) {
     closeBtn.disabled = true;
     closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">block</span> Cerrar Valvula';
   } else {
-    closeBtn.disabled = false;
-    closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">cancel</span> Detener proceso';
+    closeBtn.disabled = true;
+    closeBtn.innerHTML = '<span class="material-symbols-outlined text-lg">block</span> Cerrar Valvula';
     openBtn.disabled = true;
     openBtn.innerHTML = '<span class="material-symbols-outlined text-lg">water_drop</span> Abrir Valvula';
   }
@@ -796,6 +797,13 @@ async function controlValve(open) {
 }
 
 async function stopValveTransition() {
+  if (stopTransitionPending) return;
+  if (currentTransitionAction !== "opening") {
+    showToast("Solo puedes detener el proceso cuando la válvula está abriéndose", "info");
+    return;
+  }
+
+  stopTransitionPending = true;
   try {
     const res = await fetch(`${API_URL}/api/riego/detener`, {
       method: "POST",
@@ -814,6 +822,7 @@ async function stopValveTransition() {
   } catch {
     showToast("No se pudo conectar al servidor", "error");
   } finally {
+    stopTransitionPending = false;
     await updateValveStatus();
   }
 }
@@ -987,10 +996,7 @@ document.getElementById("valve-open-btn").addEventListener("click", async () => 
 
 document.getElementById("valve-close-btn").addEventListener("click", async () => {
   if (timedIrrigationActive || timedIrrigationPending) return;
-  if (currentTransitionAction === "closing") {
-    await stopValveTransition();
-    return;
-  }
+  if (currentTransitionAction === "closing") return;
   if (scheduledAutoCloseTimeout) {
     clearTimeout(scheduledAutoCloseTimeout);
     scheduledAutoCloseTimeout = null;
